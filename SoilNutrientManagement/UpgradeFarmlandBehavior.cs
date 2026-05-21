@@ -5,6 +5,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
+using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
@@ -227,13 +228,16 @@ class UpgradeFarmlandBehavior : BlockBehavior
         return farmlandAttributes;
     }
 
-    private void UpgradeFarmland(Block block, IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, int requiredBioChar)
+    private void UpgradeFarmland(Block block, IWorldAccessor world, IPlayer byPlayer, BlockPos pos, int requiredBioChar)
     {
         // Inventory and world state changes must only run server-side
         if (world.Side != EnumAppSide.Server) return;
 
-        var pos = blockSel.Position;
-        var farmland = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityFarmland;
+        //var pos = blockSel.Position;
+        //BlockEntityFarmland farmland;
+        //if (isCrop){ farmland = world.BlockAccessor.GetBlockEntity(pos.DownCopy()) as BlockEntityFarmland; }
+        //else { farmland = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityFarmland; }
+        BlockEntityFarmland farmland = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityFarmland;
 
         var farmlandAttributes = new TreeAttribute();
         farmland.ToTreeAttributes(farmlandAttributes);
@@ -254,6 +258,7 @@ class UpgradeFarmlandBehavior : BlockBehavior
 
             // Spend biochar
             byPlayer.InventoryManager.ActiveHotbarSlot.TakeOut(requiredBioChar);
+            byPlayer.InventoryManager.ActiveHotbarSlot.MarkDirty();
 
             // Upgrade original fertility values
             farmlandAttributes.SetInt("originalFertilityN", GetUpgradedFertility(farmlandAttributes.GetInt("originalFertilityN")));
@@ -273,7 +278,8 @@ class UpgradeFarmlandBehavior : BlockBehavior
 
             //apply attribute changes
             farmland.FromTreeAttributes(farmlandAttributes, world);
-            farmland.MarkDirty();
+            farmland.MarkDirty(true);
+            //BEFarmland UpdateFarmlandBlock is protected and cannot be used to force visual update.
 
             try
             {
@@ -292,20 +298,21 @@ class UpgradeFarmlandBehavior : BlockBehavior
         }
     }
 
-    private void DefaultBehavior(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ref EnumHandling handling)
+    private void DefaultBehavior(IWorldAccessor world, IPlayer byPlayer, BlockPos pos, ref EnumHandling handling)
     {
         ItemStack heldItemstack = byPlayer.InventoryManager.ActiveHotbarSlot.Itemstack;
         JsonObject attribute = heldItemstack?.Collectible?.Attributes?["bioCharFill"];
         if (attribute != null && attribute.AsFloat() > 0)
         {
             var requiredBiochar = (int)Math.Ceiling(ModConfig.configData.requiredBioChar / attribute.AsFloat());
-            Block block = world.BlockAccessor.GetBlock(blockSel.Position);
+            Block block = world.BlockAccessor.GetBlock(pos);
+
             if (IsValidFarmland(block.Code.GetName()))
             {
                 if (heldItemstack.StackSize >= requiredBiochar)
                 {
                     this.Api.Logger.Debug($"Biochar needed: {requiredBiochar}");
-                    UpgradeFarmland(block, world, byPlayer, blockSel, requiredBiochar);
+                    UpgradeFarmland(block, world, byPlayer, pos, requiredBiochar);
                     handling = EnumHandling.Handled;
                 }
                 else
@@ -328,9 +335,19 @@ class UpgradeFarmlandBehavior : BlockBehavior
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ref EnumHandling handling)
     {
         Block block = world.BlockAccessor.GetBlock(blockSel.Position);
+
         if (block is not null)
         {
-            DefaultBehavior(world, byPlayer, blockSel, ref handling);
+            if (block is BlockFarmland)
+            {
+                //this.Api.Logger.Debug($"Upgrading farmland");
+                DefaultBehavior(world, byPlayer, blockSel.Position, ref handling); 
+            }
+            else if (block is BlockCrop)
+            {
+                //this.Api.Logger.Debug($"Upgrading farmland below crop");
+                DefaultBehavior(world, byPlayer, blockSel.Position.DownCopy(), ref handling);
+            }
         }
         return true;
     }

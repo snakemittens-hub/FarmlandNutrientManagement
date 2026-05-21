@@ -1,0 +1,34 @@
+﻿[
+  {
+    "file": "game:itemtypes/resource/drygrass.json",
+    "op": "addmerge",
+    "path": "/combustibleProps",
+    "value": {
+      "meltingPoint": 250,
+      "meltingDuration": 15,
+      "smeltedRatio": 16,
+      "smeltingType": "convert",
+      "smeltedStack": {
+        "type": "item",
+        "code": "farmlandnutrientmanagement:biochar"
+      },
+      "requiresContainer": false
+    }
+  },
+  {
+    "file": "game:itemtypes/resource/stick.json",
+    "op": "addmerge",
+    "path": "/combustibleProps",
+    "value": {
+      "meltingPoint": 250,
+      "meltingDuration": 15,
+      "smeltedRatio": 8,
+      "smeltingType": "convert",
+      "smeltedStack": {
+        "type": "item",
+        "code": "farmlandnutrientmanagement:biochar"
+      },
+      "requiresContainer": false
+    }
+  }
+]
