@@ -233,12 +233,7 @@ class UpgradeFarmlandBehavior : BlockBehavior
         // Inventory and world state changes must only run server-side
         if (world.Side != EnumAppSide.Server) return;
 
-        //var pos = blockSel.Position;
-        //BlockEntityFarmland farmland;
-        //if (isCrop){ farmland = world.BlockAccessor.GetBlockEntity(pos.DownCopy()) as BlockEntityFarmland; }
-        //else { farmland = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityFarmland; }
         BlockEntityFarmland farmland = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityFarmland;
-
         var farmlandAttributes = new TreeAttribute();
         farmland.ToTreeAttributes(farmlandAttributes);
 
@@ -294,17 +289,6 @@ class UpgradeFarmlandBehavior : BlockBehavior
             farmland.MarkDirty(true);
             //BEFarmland UpdateFarmlandBlock is protected and cannot be used to force visual update.
 
-            try
-            {
-                //world.PlaySoundAt(world.BlockAccessor.GetBlock(pos).Sounds.Hit, (double)pos.X + 0.5, (double)pos.Y + 0.75, (double)pos.Z + 0.5, byPlayer, true, 12f, 1f);
-                long randomsound = world.Rand.Next(1, 4);
-                world.PlaySoundAt(new AssetLocation("sounds/block/dirt" + randomsound), (double)pos.X + 0.5, (double)pos.Y + 0.75, (double)pos.Z + 0.5, byPlayer, true, 12f, 1f);
-            }
-            catch (Exception e)
-            {
-                this.Api.Logger.Debug(e.ToString());
-            }
-
             string upgradeMsg = Lang.Get("farmlandnutrientmanagement:farmland-upgraded") + $"{farmland.OriginalFertility[0]}/{farmland.OriginalFertility[1]}/{farmland.OriginalFertility[2]}";
             (this.Api as ICoreServerAPI).SendMessage(byPlayer, 0, upgradeMsg, EnumChatType.Notification);
             this.Api.Logger.Debug(upgradeMsg);
@@ -326,6 +310,8 @@ class UpgradeFarmlandBehavior : BlockBehavior
                 {
                     this.Api.Logger.Debug($"Biochar needed: {requiredBiochar}");
                     UpgradeFarmland(block, world, byPlayer, pos, requiredBiochar);
+                    SoundAttributes? fertilizedSound = world.BlockAccessor.GetBlock(pos).Attributes?["fertilizedSound"].AsObject<SoundAttributes?>(null, block.Code.Domain, true);
+                    world.PlaySoundAt(fertilizedSound ?? new SoundAttributes(AssetLocation.Create("sounds/block/dirt"), true) { Range = 12 }, pos, 0.25, byPlayer);
                     handling = EnumHandling.Handled;
                 }
                 else
@@ -352,15 +338,9 @@ class UpgradeFarmlandBehavior : BlockBehavior
         if (block is not null)
         {
             if (block is BlockFarmland)
-            {
-                //this.Api.Logger.Debug($"Upgrading farmland");
                 DefaultBehavior(world, byPlayer, blockSel.Position, ref handling); 
-            }
             else if (block is BlockCrop)
-            {
-                //this.Api.Logger.Debug($"Upgrading farmland below crop");
                 DefaultBehavior(world, byPlayer, blockSel.Position.DownCopy(), ref handling);
-            }
         }
         return true;
     }
