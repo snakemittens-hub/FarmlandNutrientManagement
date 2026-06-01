@@ -94,7 +94,7 @@ class UpgradeFarmlandBehavior : BlockBehavior
         return name.StartsWith("farmland-moist-");
     }
 
-    public bool HasEnoughFertilizer(TreeAttribute farmlandAttributes)
+    public bool HasEnoughFertilizer(TreeAttribute farmlandAttributes, IServerPlayer byPlayer)
     {
         if (farmlandAttributes.HasAttribute("slowN") && farmlandAttributes.HasAttribute("slowP") && farmlandAttributes.HasAttribute("slowK"))
         {
@@ -108,9 +108,9 @@ class UpgradeFarmlandBehavior : BlockBehavior
             {
                 if (ModConfig.configData.limitP && slowP > ModConfig.configData.excessP)
                 {
-                    if (this.Api is ICoreClientAPI api)
+                    if (this.Api is ICoreServerAPI api)
                     {
-                        api.TriggerIngameError((object)this, "high-p", Lang.Get("farmlandnutrientmanagement:high-p"));
+                        api.SendIngameError(byPlayer, "high-p", Lang.Get("farmlandnutrientmanagement:high-p"));
                     }
                     return false;
                 }
@@ -119,19 +119,19 @@ class UpgradeFarmlandBehavior : BlockBehavior
             else
             {
                 // User feedback for which fertilizers to add
-                if (this.Api is ICoreClientAPI api)
+                if (this.Api is ICoreServerAPI api)
                 {
                     if (slowN < ModConfig.configData.requiredN)
                     {
-                        api.TriggerIngameError((object)this, "low-n", Lang.Get("farmlandnutrientmanagement:low-n"));
+                        api.SendIngameError(byPlayer, "low-n", Lang.Get("farmlandnutrientmanagement:low-n"));
                     }
                     else if (slowP < ModConfig.configData.requiredP)
                     {
-                        api.TriggerIngameError((object)this, "low-p", Lang.Get("farmlandnutrientmanagement:low-p"));
+                        api.SendIngameError(byPlayer, "low-p", Lang.Get("farmlandnutrientmanagement:low-p"));
                     }
                     else if (slowK < ModConfig.configData.requiredK)
                     {
-                        api.TriggerIngameError((object)this, "low-k", Lang.Get("farmlandnutrientmanagement:low-k"));
+                        api.SendIngameError(byPlayer, "low-k", Lang.Get("farmlandnutrientmanagement:low-k"));
                     }
                 }
             }
@@ -237,7 +237,7 @@ class UpgradeFarmlandBehavior : BlockBehavior
         var farmlandAttributes = new TreeAttribute();
         farmland.ToTreeAttributes(farmlandAttributes);
 
-        if (HasEnoughFertilizer(farmlandAttributes))
+        if (HasEnoughFertilizer(farmlandAttributes, byPlayer as IServerPlayer))
         {
             // Remove any permaboost original fertility modifiers
             farmlandAttributes = RemovePermaboosts(farmlandAttributes);
@@ -249,7 +249,8 @@ class UpgradeFarmlandBehavior : BlockBehavior
             // Cancel action if farmland is already base Terra Preta
             if (fertN >= 80 && fertP >= 80 && fertK >= 80)
             {
-                (this.Api as ICoreServerAPI).SendIngameError(byPlayer as IServerPlayer, "max-fert", Lang.Get("farmlandnutrientmanagement:max-fert"));
+                if (this.Api is ICoreServerAPI api)
+                    api.SendIngameError(byPlayer as IServerPlayer, "max-fert", Lang.Get("farmlandnutrientmanagement:max-fert"));
                 return;
             }
 
