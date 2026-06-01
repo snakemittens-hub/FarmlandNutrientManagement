@@ -1,0 +1,14 @@
+{
+  "introduction-title": "Mecánica de Juego: Gestión de nutrientes en tierras agrícolas",
+  "introduction-text": "<strong>Gestión de nutrientes en tierras agrícolas</strong><br>    <i>\"No es mucho, pero es un trabajo honesto.\"</i> - Dave Brandt<br><br>Las tierras de cultivo pueden mejorarse permanentemente <i>in situ</i> mediante la aplicación de suficiente fertilizante y biocarbón, pasando desde un estado estéril —a través de niveles bajo, medio y alto— hasta alcanzar finalmente el estado de Terra Preta.<br><br><strong>Paso Uno:</strong><br>Añada cualquier combinación de fertilizantes para aportar al menos 148 de N, 90 de P y 30 de K. <br><itemstack type=\"item\">compost</itemstack><itemstack type=\"item\">bonemeal</itemstack><br><br><strong>Paso Dos:</strong><br>Añade dos unidades de carbón vegetal en polvo a la tierra de cultivo fertilizada.<br><itemstack type=\"item\">powder-charcoal</itemstack><br><br><strong>Paso Tres:</strong><br>¡Espera! La tierra de cultivo regenerará ahora los nutrientes a la tasa normal, hasta alcanzar sus nuevos límites.",
+  "farmland-upgraded": "La capacidad de nutrientes de la tierra agrícola aumentó a ",
+  "high-p": "El fósforo está demasiado alto. Espere a que los niveles disminuyan.",
+  "low-n": "No hay suficientes nitratos. Añada fertilizantes ricos en N.",
+  "low-p": "Falta de fósforo. Añada fertilizantes ricos en P.",
+  "low-k": "No hay suficiente potasio. Añada fertilizantes ricos en K.",
+  "low-biochar": "No hay suficiente {0}. Se necesita al menos {1}.",
+  "max-fert": "¡La tierra agrícola ya es extremadamente fértil!",
+  "game:itemdesc-powder-charcoal": "Excelente para la retención de nutrientes. Úselo en tierras agrícolas suficientemente fertilizadas para aumentar permanentemente su nivel.",
+  "item-biochar": "Biocarbón",
+  "itemdesc-biochar": "Excelente para la retención de nutrientes. Úselo en tierras agrícolas suficientemente fertilizadas para aumentar permanentemente su nivel."
+}

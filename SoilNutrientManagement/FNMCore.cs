@@ -37,15 +37,11 @@ public class FNMCore : ModSystem
         {
             // Make sure block or its code is not null
             if (block == null || block.Code == null)
-            {
                 continue;
-            }
 
-            // Only apply to crops
+            // Only apply behavior to crops
             if (block is not BlockCrop)
-            {
                 continue;
-            }
 
             UpgradeFarmlandBehavior blockBehavior = new UpgradeFarmlandBehavior(block);
 
