@@ -6,4 +6,5 @@
     public float requiredBioChar = 1;
     public float excessP = 130;
     public bool limitP = true;
+    public float upgradePercent = 0.2f;
 }

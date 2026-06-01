@@ -247,10 +247,12 @@ class UpgradeFarmlandBehavior : BlockBehavior
             // Remove any permaboost original fertility modifiers
             farmlandAttributes = RemovePermaboosts(farmlandAttributes);
 
+            var fertN = farmlandAttributes.GetInt("originalFertilityN");
+            var fertP = farmlandAttributes.GetInt("originalFertilityP");
+            var fertK = farmlandAttributes.GetInt("originalFertilityK");
+
             // Cancel action if farmland is already base Terra Preta
-            if (farmlandAttributes.GetInt("originalFertilityN") >= 80 &&
-                farmlandAttributes.GetInt("originalFertilityP") >= 80 &&
-                farmlandAttributes.GetInt("originalFertilityK") >= 80)
+            if (fertN >= 80 && fertP >= 80 && fertK >= 80)
             {
                 (this.Api as ICoreServerAPI).SendIngameError(byPlayer as IServerPlayer, "max-fert", Lang.Get("farmlandnutrientmanagement:max-fert"));
                 return;
@@ -264,6 +266,17 @@ class UpgradeFarmlandBehavior : BlockBehavior
             farmlandAttributes.SetInt("originalFertilityN", GetUpgradedFertility(farmlandAttributes.GetInt("originalFertilityN")));
             farmlandAttributes.SetInt("originalFertilityP", GetUpgradedFertility(farmlandAttributes.GetInt("originalFertilityP")));
             farmlandAttributes.SetInt("originalFertilityK", GetUpgradedFertility(farmlandAttributes.GetInt("originalFertilityK")));
+
+            // Boost current nutrient values by configurable amount
+            float nutrientIncrease = GetUpgradedFertility(fertN) - fertN;
+            float upgradePercent = ModConfig.configData.upgradePercent;
+            //clamp upgradePercent between 0 and 1
+            if (upgradePercent > 1) upgradePercent = 1;
+            else if (upgradePercent < 0) upgradePercent = 0;
+            nutrientIncrease *= upgradePercent;
+            farmlandAttributes.SetFloat("n", farmlandAttributes.GetFloat("n") + nutrientIncrease);
+            farmlandAttributes.SetFloat("p", farmlandAttributes.GetFloat("p") + nutrientIncrease);
+            farmlandAttributes.SetFloat("k", farmlandAttributes.GetFloat("k") + nutrientIncrease);
 
             // Restore any permaboost original fertility modifiers
             farmlandAttributes = RestorePermaboosts(farmlandAttributes);
